@@ -22,10 +22,10 @@ export default function Index() {
           style={{ width: 338, height: 150 }}
         />
       </View>
-      <Tableau children={<Text>Contenu du tableau</Text>} />
+      <Tableau />
       <Image
         source={require('@/assets/images/mafieux.png')}
-        style={{ width: 100, height: 100 }}
+        style={{ width: '100%', height: '60%', position: 'absolute', bottom: 0, zIndex: -999 }}
       />
       {/* Emplacement de pub */}
       <Pub />
