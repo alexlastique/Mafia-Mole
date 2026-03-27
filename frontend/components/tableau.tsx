@@ -2,7 +2,7 @@ import { Text, View , StyleSheet, Image, Pressable } from "react-native";
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import PopupGame from "@/components/PopupGame";
-
+import PopupRule from "@/components/PopupRule";
 
 const styles = StyleSheet.create({
     tableau: {
@@ -43,7 +43,7 @@ export default function Tableau(){
                     style={{ width: 60, height: 50, backgroundColor: 'black', position: 'absolute', top: '17%', right: '10%', transform: [{ rotate: '9deg' }] }}
                 />
                 <Pressable
-                    onPress={() => setPopupGameVisible(true)}
+                    onPress={() => setPopupReglesVisible(true)}
                     style={{ width: 55, height: 55, backgroundColor: 'yellow', position: 'absolute', top: '59%', right: '10%', transform: [{ rotate: '-10deg' }] }}
                 />
                 <Link 
@@ -51,10 +51,14 @@ export default function Tableau(){
                     style={{ width: 50, height: 70, backgroundColor: 'white', position: 'absolute', top: '11%', left: '10%', transform: [{ rotate: '5deg' }] }}
                 />
             </View>
-                <PopupGame
-                    visible={popupGameVisisble}
-                    onClose={() => setPopupGameVisible(false)}
-                />
+            <PopupGame
+                visible={popupGameVisisble}
+                onClose={() => setPopupGameVisible(false)}
+            />
+            <PopupRule
+                visible={popupReglesVisible}
+                onClose={() => setPopupReglesVisible(false)}
+            />
         </View>
     );
 }
