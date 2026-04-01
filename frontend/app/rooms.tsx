@@ -1,5 +1,5 @@
 import { Text, View , StyleSheet, Image, Pressable } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, router } from "expo-router";
 import Pub from "../components/Pub";
 import BackButton from "../components/BackButton";
@@ -7,14 +7,37 @@ import ParameterButton from "../components/ParameterButton";
 import PopupGameStat from "../components/PopupGameStat";
 import PlayerItem from "@/components/PlayerItem";
 
+interface Player {
+  id: number;
+  name: string;
+  status: string;
+  skin: string;
+  premium: boolean;
+}
+
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
-    let listePlayer = [
-      { id: 1, name: 'Glouby', status: 'host' , skin: 'default', premium: false },
-      { id: 2, name: 'Orphéon', status: 'invite' , skin: 'skin2', premium: false  },
-      { id: 3, name: 'Sicarius', status: 'invite' , skin: 'default', premium: false  },
-      { id: 4, name: 'Zokar', status: 'invite' , skin: 'default', premium: true  },
-    ];
+    const [listePlayer, setListePlayer] = useState<Player[]>([]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await fetch("http://10.0.2.2:8000/room/join/1", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id_user: 1 }),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                setListePlayer(data.playerInRoom || []);
+            } catch (e) {
+                console.log("room fetch error", e);
+            }
+        })();
+    }, []);
+
     let maxPlayer = 10;
   return (
     <View

@@ -1,7 +1,25 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from typing import List
+from pydantic import BaseModel
+
+import json
+import mysql.connector
+
+
+class JoinRequest(BaseModel):
+    id_user: int
 
 app = FastAPI()
+with open("db_config.json", "r") as f:
+    param = json.load(f)
+    
+conn = mysql.connector.connect(
+    host=param["host"],
+    user=param["user"],
+    password=param["password"],
+    database=param["database"]
+)
+
 
 clients: List[WebSocket] = []
 
@@ -57,6 +75,39 @@ async def read_item(item_id: int, q: str | None = None):
 @app.post("/room/create")
 def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}
+
+@app.post("/room/join/{room_id}")
+async def join_room(room_id: int, req: JoinRequest):
+    id_user = req.id_user
+    print(f"User {id_user} rejoint la room {room_id}")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT Id FROM user WHERE Id = %s", (id_user,))
+    user_exists = cursor.fetchone()
+
+    if not user_exists:
+        cursor.execute("INSERT INTO user (Id, Pseudo) VALUES (%s, %s)", (id_user, f"User {id_user}"))
+        conn.commit()
+
+    # cursor.execute("INSERT INTO `mafiamole`.`game` (`Id`, `Parameter_`, `Status`) VALUES ('1', 'teste', 'test')")
+    cursor.execute("UPDATE user SET Id_1 = %s WHERE Id = %s", (room_id, id_user))
+    conn.commit()
+    
+    cursor.execute("SELECT Id, Pseudo, Premium FROM user WHERE Id_1 = %s", (room_id,))
+    playerInRoom = []
+    
+    for row in cursor.fetchall():
+        playerInRoom.append({
+            "id": row[0],
+            "name": row[1],
+            "status": "default",
+            "skin": "default",
+            "premium": row[2] if row[2] is not None else False
+        })
+    print(playerInRoom)
+    await broadcast("{\"playerInRoom\": " + str(playerInRoom) + "}")
+    
+    return {"playerInRoom": playerInRoom}
 
 @app.get("/room/code")
 def read_item(item_id: int, q: str | None = None):
