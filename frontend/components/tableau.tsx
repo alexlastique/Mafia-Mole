@@ -43,7 +43,7 @@ export default function Tableau(){
     };
 
     return (
-        <View style={styles.tableau}>join
+        <View style={styles.tableau}>
             <Image 
                 source={require('@/assets/images/Tableau.png')}
                 style={{ width: '100%', height: '90%', zIndex: -1000 }}
@@ -66,7 +66,7 @@ export default function Tableau(){
                     style={{ width: 55, height: 55, backgroundColor: 'transparent', position: 'absolute', top: '59%', right: '10%', transform: [{ rotate: '-10deg' }] }}
                 />
                 <Link 
-                    href="/rooms" 
+                    href="/stats" 
                     style={{ width: 50, height: 70, backgroundColor: 'transparent', position: 'absolute', top: '11%', left: '10%', transform: [{ rotate: '5deg' }] }}
                 />
             </View>

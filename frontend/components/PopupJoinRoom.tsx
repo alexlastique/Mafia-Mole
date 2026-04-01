@@ -1,5 +1,6 @@
 import { Text, View, Pressable, Modal, StyleSheet, TextInput, Platform } from "react-native";
 import { useState } from "react";
+import { Link } from "expo-router";
 
 type PopupJoinProps = {
   visible: boolean;
@@ -29,18 +30,17 @@ export default function PopupJoinRoom({ visible, onClose }: PopupJoinProps) {
               style={styles.input}
               value={code}
               onChangeText={setCode}
-              maxLength={5}
               autoCapitalize="characters"
             />
           </View>
 
           {/* Bouton COMMENCER (Vert) */}
-          <Pressable 
+          <Link 
+              href="/rooms" 
             style={styles.btnCommencer} 
-            onPress={() => console.log("Code entré:", code)}
           >
             <Text style={styles.btnCommencerText}>COMMENCER</Text>
-          </Pressable>
+          </Link>
 
         </Pressable>
       </Pressable>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderRadius: 25,
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: "bold",
   },
   btnCommencer: {
