@@ -2,7 +2,8 @@ import { Text, View , StyleSheet, Image, Pressable } from "react-native";
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import PopupGame from "@/components/PopupGame";
-import PopupRule from "@/components/PopupRule";
+import PopupJoinRoom from "./PopupJoinRoom";
+import PopupCreateRoom from "./PopupCreateRoom";
 
 const styles = StyleSheet.create({
     tableau: {
@@ -20,11 +21,29 @@ const styles = StyleSheet.create({
 });
 
 export default function Tableau(){
-    const [popupGameVisisble, setPopupGameVisible] = useState(false);
+    const [popupGameVisible, setPopupGameVisible] = useState(false);
     const [popupReglesVisible, setPopupReglesVisible] = useState(false);
+    const [popupJoinVisible, setPopupJoinVisible] = useState(false);
+    const [popupCreateVisible, setPopupCreateVisible] = useState(false);
+    
+    // Fonction pour passer de PopupGame à PopupJoinRoom
+    const handleOpenJoin = () => {
+        setPopupGameVisible(false); // On ferme la première
+        setTimeout(() => {
+        setPopupJoinVisible(true); // On ouvre la seconde (le petit timeout aide à la fluidité sur Android)
+        }, 100);
+    };
+    
+    // Fonction pour passer de PopupGame à PopupCreateRoom
+    const handleOpenCreate = () => {
+        setPopupGameVisible(false);
+        setTimeout(() => {
+            setPopupCreateVisible(true);
+        }, 100);
+    };
 
     return (
-        <View style={styles.tableau}>
+        <View style={styles.tableau}>join
             <Image 
                 source={require('@/assets/images/Tableau.png')}
                 style={{ width: '100%', height: '90%', zIndex: -1000 }}
@@ -52,12 +71,20 @@ export default function Tableau(){
                 />
             </View>
             <PopupGame
-                visible={popupGameVisisble}
+                visible={popupGameVisible}
                 onClose={() => setPopupGameVisible(false)}
+                onJoin={handleOpenJoin} // On passe la fonction de switch ici
+                onCreate={handleOpenCreate}
             />
-            <PopupRule
-                visible={popupReglesVisible}
-                onClose={() => setPopupReglesVisible(false)}
+            
+            <PopupCreateRoom
+                visible={popupCreateVisible}
+                onClose={() => setPopupCreateVisible(false)}
+            />
+
+            <PopupJoinRoom
+                visible={popupJoinVisible}
+                onClose={() => setPopupJoinVisible(false)}
             />
         </View>
     );

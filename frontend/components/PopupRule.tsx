@@ -1,5 +1,4 @@
 import { Text, View, TouchableOpacity, Modal, StyleSheet, ScrollView } from "react-native";
-import { type ReactNode } from "react";
 
 type PopupRuleProps = {
   visible: boolean;
