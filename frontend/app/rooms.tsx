@@ -15,10 +15,24 @@ interface Player {
   premium: boolean;
 }
 
+const ws = new WebSocket("ws://26.83.105.189:8000/ws");
+
+
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
     const [listePlayer, setListePlayer] = useState<Player[]>([]);
 
+    ws.onmessage = (event) => {
+      try {
+        let data = JSON.parse(event.data);
+        if (data.playerInRoom) {
+          setListePlayer(data.playerInRoom);
+        }
+      }catch (e) {
+        console.log("WebSocket message parsing error:", e);
+      }
+      console.log(event.data);
+    };
     useEffect(() => {
         (async () => {
             try {

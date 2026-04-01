@@ -79,7 +79,6 @@ def read_item(item_id: int, q: str | None = None):
 @app.post("/room/join/{room_id}")
 async def join_room(room_id: int, req: JoinRequest):
     id_user = req.id_user
-    print(f"User {id_user} rejoint la room {room_id}")
     cursor = conn.cursor()
 
     cursor.execute("SELECT Id FROM user WHERE Id = %s", (id_user,))
@@ -104,8 +103,7 @@ async def join_room(room_id: int, req: JoinRequest):
             "skin": "default",
             "premium": row[2] if row[2] is not None else False
         })
-    print(playerInRoom)
-    await broadcast("{\"playerInRoom\": " + str(playerInRoom) + "}")
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
     
     return {"playerInRoom": playerInRoom}
 
