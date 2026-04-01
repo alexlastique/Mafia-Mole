@@ -47,7 +47,7 @@ export default function Tableau(){
                     style={{ width: 55, height: 55, backgroundColor: 'yellow', position: 'absolute', top: '59%', right: '10%', transform: [{ rotate: '-10deg' }] }}
                 />
                 <Link 
-                    href="/stats" 
+                    href="/rooms" 
                     style={{ width: 50, height: 70, backgroundColor: 'white', position: 'absolute', top: '11%', left: '10%', transform: [{ rotate: '5deg' }] }}
                 />
             </View>

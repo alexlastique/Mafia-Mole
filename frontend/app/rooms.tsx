@@ -32,10 +32,10 @@ export default function Index() {
         />
       </View>
       <ParameterButton />
-      <Pressable
+      {/* <Pressable
         onPress={() => setPopupGameVisible(true)}>
         <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 20, backgroundColor: '#A4A2B4', paddingHorizontal: 12, paddingVertical: 9, borderRadius: 100 }}>Configuration</Text>
-      </Pressable>
+      </Pressable> */}
       <View style={{ borderBottomWidth: 5, borderColor: '#A4A2B4', width: 393, marginTop: 24 }} />
 
       <View>
@@ -44,6 +44,14 @@ export default function Index() {
           <PlayerItem key={player.id} Player={player} />
         ))}
       </View>
+      
+      <View style={{ borderBottomWidth: 5, borderColor: '#A4A2B4', width: 393, marginTop: 24 }} />
+
+      <Pressable
+        onPress={() => router.push('/parametres')}
+        style={{ marginTop: 23 }}>
+        <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 28, backgroundColor: '#21B83D', paddingHorizontal: 77, paddingVertical: 15, borderRadius: 100 }}>Lancer la partie</Text>
+      </Pressable>
 
       {/* Emplacement de pub */}
       <Pub />

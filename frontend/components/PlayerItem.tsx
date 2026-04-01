@@ -10,7 +10,8 @@ export default function PlayerItem( { Player }: { Player: { id: number, name: st
     return require("../assets/images/default.png");
   };
 
-  const isYou = Player.name === "Glouby"; // Remplacez "Glouby" par le nom de l'utilisateur actuel
+  const you = { name: "Glouby", status: "host", premium: false }; // Remplacez par les données de l'utilisateur actuel
+  const isYou = Player.name === you.name;
 
   return (
     <View style={{ marginBottom: 12, width: 388, height: 96 }}>
@@ -24,16 +25,16 @@ export default function PlayerItem( { Player }: { Player: { id: number, name: st
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
               <Text style={{ fontSize: 14, color: "#555", letterSpacing: 1 }}>{Player.name.toUpperCase()}</Text>
               {Player.premium && <Image source={require("../assets/images/Premium.png")}/>}
+              {isHost && <Text style={{ fontSize: 12, color: "#555" }}>{" "}(Admin)</Text>}
             </View>
-            {isHost && <Text style={{ fontSize: 12, color: "#555" }}>{" "}(Admin)</Text>}
           </Text>
         </View>
 
-        {!isHost && (
+        {/* {you.status === "host" && !isHost && (
           <View style={{ width: 35, height: 35, borderRadius: 20, backgroundColor: "#eee", alignItems: "center", justifyContent: "center" }}>
             <Text style={{ fontSize: 18, color: "#333" }}>⋮</Text>
           </View>
-        )}
+        )} */}
       </View>
     </View>
   );
