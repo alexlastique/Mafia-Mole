@@ -11,10 +11,10 @@ export default function BackButton() {
             onPress={goBack}
             style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
         >
-        <Image 
-            source={require('@/assets/images/Back.png')}
-            style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
-        />
+            <Image 
+                source={require('@/assets/images/Back.png')}
+                style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
+            />
         </Pressable>
     );
 }

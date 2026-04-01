@@ -107,6 +107,37 @@ async def join_room(room_id: int, req: JoinRequest):
     
     return {"playerInRoom": playerInRoom}
 
+@app.post("/room/quit/{room_id}")
+async def quit_room(room_id: int, req: JoinRequest):
+    id_user = req.id_user
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT Id FROM user WHERE Id = %s", (id_user,))
+    user_exists = cursor.fetchone()
+
+    if not user_exists:
+        cursor.execute("INSERT INTO user (Id, Pseudo) VALUES (%s, %s)", (id_user, f"User {id_user}"))
+        conn.commit()
+
+    # cursor.execute("INSERT INTO `mafiamole`.`game` (`Id`, `Parameter_`, `Status`) VALUES ('1', 'teste', 'test')")
+    cursor.execute("UPDATE user SET Id_1 = null WHERE Id = %s", (id_user,))
+    conn.commit()
+    
+    cursor.execute("SELECT Id, Pseudo, Premium FROM user WHERE Id_1 = %s", (room_id,))
+    playerInRoom = []
+    
+    for row in cursor.fetchall():
+        playerInRoom.append({
+            "id": row[0],
+            "name": row[1],
+            "status": "default",
+            "skin": "default",
+            "premium": row[2] if row[2] is not None else False
+        })
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
+    
+    return {"playerInRoom": playerInRoom}
+
 @app.get("/room/code")
 def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}

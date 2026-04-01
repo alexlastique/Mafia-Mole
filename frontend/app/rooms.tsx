@@ -17,6 +17,21 @@ interface Player {
 
 const ws = new WebSocket("ws://26.83.105.189:8000/ws");
 
+async function disconnectRoom(roomId: number = 1, currentUserId: number =1) {
+  console.log("Attempting to quit room...");
+  try {
+    const res = await fetch(`http://10.0.2.2:8000/room/quit/${roomId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_user: currentUserId }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ws.close();
+    router.back(); // go back to lobby/menu
+  } catch (e) {
+    console.log("room quit error", e);
+  }
+}
 
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
@@ -61,7 +76,15 @@ export default function Index() {
         marginTop: 50,
       }}
     >
-      <BackButton />
+      <Pressable
+        onPress={() => disconnectRoom()}
+        style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
+      >
+        <Image 
+            source={require('@/assets/images/Back.png')}
+            style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
+        />
+      </Pressable>
       <View style={{ marginTop: 30, marginBottom: 16, zIndex: 1000 }}>
         <Image 
           source={require('@/assets/images/Lobby.png')}
