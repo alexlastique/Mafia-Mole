@@ -2,7 +2,6 @@ import { Text, View , StyleSheet, Image, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { Link, router } from "expo-router";
 import Pub from "../components/Pub";
-import BackButton from "../components/BackButton";
 import ParameterButton from "../components/ParameterButton";
 import PopupGameStat from "../components/PopupGameStat";
 import PlayerItem from "@/components/PlayerItem";
@@ -15,7 +14,7 @@ interface Player {
   premium: boolean;
 }
 
-const ws = new WebSocket("ws://26.83.105.189:8000/ws");
+const ws = new WebSocket("ws://10.0.2.2:8000/ws");
 
 async function disconnectRoom(roomId: number = 1, currentUserId: number =1) {
   console.log("Attempting to quit room...");
@@ -27,11 +26,25 @@ async function disconnectRoom(roomId: number = 1, currentUserId: number =1) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     ws.close();
-    router.back(); // go back to lobby/menu
+    router.back();
   } catch (e) {
     console.log("room quit error", e);
   }
 }
+
+async function startGame(roomId: number = 1) {
+  console.log("Attempting to start game...");
+  try {
+    const res = await fetch(`http://10.0.2.2:8000/room/start/${roomId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  } catch (e) {
+    console.log("room start error", e);
+  }
+}
+
 
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
@@ -42,29 +55,32 @@ export default function Index() {
         let data = JSON.parse(event.data);
         if (data.playerInRoom) {
           setListePlayer(data.playerInRoom);
+        } else if (data.start) {
+          router.push('/game');
         }
       }catch (e) {
         console.log("WebSocket message parsing error:", e);
       }
       console.log(event.data);
     };
+
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await fetch("http://10.0.2.2:8000/room/join/1", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ id_user: 1 }),
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                setListePlayer(data.playerInRoom || []);
-            } catch (e) {
-                console.log("room fetch error", e);
-            }
-        })();
+      (async () => {
+        try {
+          const res = await fetch("http://10.0.2.2:8000/room/join/1", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id_user: 1 }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          setListePlayer(data.playerInRoom || []);
+        } catch (e) {
+          console.log("room fetch error", e);
+        }
+      })();
     }, []);
 
     let maxPlayer = 10;
@@ -108,7 +124,7 @@ export default function Index() {
       <View style={{ borderBottomWidth: 5, borderColor: '#A4A2B4', width: 393, marginTop: 24 }} />
 
       <Pressable
-        onPress={() => router.push('/parametres')}
+        onPress={() => startGame()}
         style={{ marginTop: 23 }}>
         <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 28, backgroundColor: '#21B83D', paddingHorizontal: 77, paddingVertical: 15, borderRadius: 100 }}>Lancer la partie</Text>
       </Pressable>

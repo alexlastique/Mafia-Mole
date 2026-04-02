@@ -5,5 +5,4 @@ python -m pip install --upgrade pip
 python -m ensurepip --upgrade
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-python main.py
-fastapi dev
+uvicorn main:app --host 0.0.0.0 --port 8000

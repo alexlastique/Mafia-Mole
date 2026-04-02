@@ -69,7 +69,7 @@ def read_item(item_id: int, q: str | None = None):
 
 @app.post("/corpse/find")
 async def read_item(item_id: int, q: str | None = None):
-    await broadcast(f"Corpse trouvé: {item_id}")
+    await broadcast("{\"corpseId\": " + json.dumps(item_id) + "}")
     return {"item_id": item_id, "q": q}
 
 @app.post("/room/create")
@@ -137,6 +137,12 @@ async def quit_room(room_id: int, req: JoinRequest):
     await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
     
     return {"playerInRoom": playerInRoom}
+
+@app.post("/room/start/{room_id}")
+async def start_room(room_id: int):
+    await broadcast("{\"start\": true}")
+    print("Start game for room", room_id)
+    return {"start": True}
 
 @app.get("/room/code")
 def read_item(item_id: int, q: str | None = None):
