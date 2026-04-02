@@ -40,7 +40,6 @@ async function startGame(roomId: number = 1) {
       headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    ws.close();
   } catch (e) {
     console.log("room start error", e);
   }
@@ -57,6 +56,7 @@ export default function Index() {
         if (data.playerInRoom) {
           setListePlayer(data.playerInRoom);
         } else if (data.start) {
+          ws.close();
           router.push('/game');
         }
       }catch (e) {

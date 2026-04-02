@@ -5,13 +5,8 @@ import { useEffect, useState } from "react";
 const ws = new WebSocket("ws://10.0.2.2:8000/ws");
 
 export default function Game() {
-  const router = useRouter();
-  const [status, setStatus] = useState("En attente de jeu...");
-
-  useEffect(() => {
-    ws.onopen = () => {
-      setStatus("Connecté au serveur de jeu");
-    };
+    const router = useRouter();
+    const [status, setStatus] = useState("En attente de jeu...");
 
     ws.onmessage = (event) => {
         try {
@@ -30,24 +25,8 @@ export default function Game() {
         }
     };
 
-    ws.onerror = (error) => {
-      console.warn("Erreur WebSocket :", error);
-      setStatus("Erreur de connexion WebSocket");
-    };
-
-    ws.onclose = () => {
-      setStatus("Déconnecté du serveur de jeu");
-    };
-
-    return () => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
-    };
-  }, []);
-
   const endGame = async () => {
-    const roomId = 1; // ajuster dynamiquement si nécessaire
+    const roomId = 1;
     try {
       const res = await fetch(`http://10.0.2.2:8000/room/finish/${roomId}`, {
         method: "POST",
