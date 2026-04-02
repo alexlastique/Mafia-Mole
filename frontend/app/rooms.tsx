@@ -40,6 +40,7 @@ async function startGame(roomId: number = 1) {
       headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ws.close();
   } catch (e) {
     console.log("room start error", e);
   }
@@ -61,7 +62,6 @@ export default function Index() {
       }catch (e) {
         console.log("WebSocket message parsing error:", e);
       }
-      console.log(event.data);
     };
 
     useEffect(() => {

@@ -144,6 +144,12 @@ async def start_room(room_id: int):
     print("Start game for room", room_id)
     return {"start": True}
 
+@app.post("/room/finish/{room_id}")
+async def finish_room(room_id: int):
+    await broadcast("{\"end\": true}")
+    print("Finish game for room", room_id)
+    return {"end": True}
+
 @app.get("/room/code")
 def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}

@@ -14,9 +14,9 @@ export default function Game() {
     };
 
     ws.onmessage = (event) => {
-        const data = event.data;
         try {
-            const parsed = JSON.parse(data);
+            const parsed = JSON.parse(event.data);
+            console.log("Received WebSocket message:", parsed);
             if (parsed.start) {
                 setStatus("Jeu démarré");
             } else if (parsed.playerInRoom) {
@@ -25,9 +25,9 @@ export default function Game() {
                 setStatus("Jeu terminé");
                 Alert.alert("Partie terminée", "Le signal de fin de jeu a été envoyé à tous les participants.");
             }
-      } catch {
-        console.log("Message non JSON reçu :", data);
-      }
+        } catch {
+            console.log("Message non JSON reçu :", event.data);
+        }
     };
 
     ws.onerror = (error) => {
@@ -46,14 +46,29 @@ export default function Game() {
     };
   }, []);
 
-  const endGame = () => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ end: true, message: "La partie est terminée" }));
-      setStatus("Signal de fin de jeu envoyé");
-    //   Alert.alert("Partie terminée", "Le signal de fin de jeu a été envoyé à tous les participants.");
-    } else {
-      Alert.alert("WebSocket indisponible", "Impossible d'envoyer le signal maintenant.");
-      setStatus("WebSocket non connecté");
+  const endGame = async () => {
+    const roomId = 1; // ajuster dynamiquement si nécessaire
+    try {
+      const res = await fetch(`http://10.0.2.2:8000/room/finish/${roomId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      setStatus("Fin de jeu déclenchée via API");
+      Alert.alert("Partie terminée", "Le serveur a été notifié via /room/finish/{room_id}.");
+
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ end: true, message: "La partie est terminée" }));
+      }
+
+    } catch (e) {
+      console.warn("Erreur appel room/finish :", e);
+      Alert.alert("Erreur API", "Impossible de terminer la partie. Vérifiez la connexion.");
+      setStatus("Erreur lors de la finalisation de la partie");
     }
   };
 
