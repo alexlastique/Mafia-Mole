@@ -14,16 +14,17 @@ export default function Game() {
     };
 
     ws.onmessage = (event) => {
-      const data = event.data;
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.start) {
-          setStatus("Jeu démarré");
-        } else if (parsed.playerInRoom) {
-          setStatus(`Joueurs en salle: ${parsed.playerInRoom.length}`);
-        } else if (parsed.end) {
-          setStatus("Jeu terminé");
-        }
+        const data = event.data;
+        try {
+            const parsed = JSON.parse(data);
+            if (parsed.start) {
+                setStatus("Jeu démarré");
+            } else if (parsed.playerInRoom) {
+                setStatus(`Joueurs en salle: ${parsed.playerInRoom.length}`);
+            } else if (parsed.end) {
+                setStatus("Jeu terminé");
+                Alert.alert("Partie terminée", "Le signal de fin de jeu a été envoyé à tous les participants.");
+            }
       } catch {
         console.log("Message non JSON reçu :", data);
       }
@@ -49,7 +50,7 @@ export default function Game() {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ end: true, message: "La partie est terminée" }));
       setStatus("Signal de fin de jeu envoyé");
-      Alert.alert("Partie terminée", "Le signal de fin de jeu a été envoyé à tous les participants.");
+    //   Alert.alert("Partie terminée", "Le signal de fin de jeu a été envoyé à tous les participants.");
     } else {
       Alert.alert("WebSocket indisponible", "Impossible d'envoyer le signal maintenant.");
       setStatus("WebSocket non connecté");
