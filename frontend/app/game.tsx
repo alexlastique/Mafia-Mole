@@ -1,8 +1,9 @@
 import { View, Text, Button, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { API_CONFIG } from "../config";
 
-const ws = new WebSocket("ws://10.0.2.2:8000/ws");
+const ws = new WebSocket(`ws://${API_CONFIG.IP}:8000/ws`);
 
 export default function Game() {
     const router = useRouter();
@@ -28,7 +29,7 @@ export default function Game() {
   const endGame = async () => {
     const roomId = 1;
     try {
-      const res = await fetch(`http://10.0.2.2:8000/room/finish/${roomId}`, {
+      const res = await fetch(`${API_CONFIG.PROTOCOL}:// ${API_CONFIG.IP}:8000/room/finish/${roomId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -37,8 +38,8 @@ export default function Game() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      setStatus("Fin de jeu déclenchée via API");
-      Alert.alert("Partie terminée", "Le serveur a été notifié via /room/finish/{room_id}.");
+      setStatus("Jeu terminé");
+      Alert.alert("Partie terminée", "Le signal de fin de jeu a été envoyé à tous les participants.");
 
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ end: true, message: "La partie est terminée" }));

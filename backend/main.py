@@ -147,6 +147,11 @@ async def start_room(room_id: int):
 @app.post("/room/finish/{room_id}")
 async def finish_room(room_id: int):
     await broadcast("{\"end\": true}")
+    cursor = conn.cursor()
+    cursor.execute("SELECT Id FROM user WHERE Id_1 = %s", (room_id,))
+    for row in cursor.fetchall():
+        cursor.execute("UPDATE user SET Id_1 = null WHERE Id = %s", (row[0],))
+        conn.commit()
     print("Finish game for room", room_id)
     return {"end": True}
 

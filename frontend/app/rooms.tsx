@@ -5,6 +5,7 @@ import Pub from "../components/Pub";
 import ParameterButton from "../components/ParameterButton";
 import PopupGameStat from "../components/PopupGameStat";
 import PlayerItem from "@/components/PlayerItem";
+import { API_CONFIG } from "../config";
 
 interface Player {
   id: number;
@@ -14,12 +15,12 @@ interface Player {
   premium: boolean;
 }
 
-const ws = new WebSocket("ws://10.0.2.2:8000/ws");
+const ws = new WebSocket(`ws://${API_CONFIG.IP}:8000/ws`);
 
-async function disconnectRoom(roomId: number = 1, currentUserId: number =1) {
+async function disconnectRoom(roomId: number = 1, currentUserId: number = 1) {
   console.log("Attempting to quit room...");
   try {
-    const res = await fetch(`http://10.0.2.2:8000/room/quit/${roomId}`, {
+    const res = await fetch(`${API_CONFIG.PROTOCOL}:// ${API_CONFIG.IP}:8000/room/quit/${roomId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_user: currentUserId }),
@@ -35,7 +36,7 @@ async function disconnectRoom(roomId: number = 1, currentUserId: number =1) {
 async function startGame(roomId: number = 1) {
   console.log("Attempting to start game...");
   try {
-    const res = await fetch(`http://10.0.2.2:8000/room/start/${roomId}`, {
+    const res = await fetch(`${API_CONFIG.PROTOCOL}:// ${API_CONFIG.IP}:8000/room/start/${roomId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
@@ -67,7 +68,7 @@ export default function Index() {
     useEffect(() => {
       (async () => {
         try {
-          const res = await fetch("http://10.0.2.2:8000/room/join/1", {
+          const res = await fetch(`${API_CONFIG.PROTOCOL}:// ${API_CONFIG.IP}:8000/room/join/1`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

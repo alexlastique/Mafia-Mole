@@ -4,6 +4,7 @@ import { Link, router } from "expo-router";
 import PopupGame from "@/components/PopupGame";
 import PopupJoinRoom from "./PopupJoinRoom";
 import PopupCreateRoom from "./PopupCreateRoom";
+import PopupRule from "./PopupRule";
 
 const styles = StyleSheet.create({
     tableau: {
@@ -69,7 +70,11 @@ export default function Tableau(){
                     href="/stats" 
                     style={{ width: 50, height: 70, backgroundColor: 'transparent', position: 'absolute', top: '11%', left: '10%', transform: [{ rotate: '5deg' }] }}
                 />
-            </View>
+            </View>            
+            <PopupRule
+                visible={popupReglesVisible}
+                onClose={() => setPopupReglesVisible(false)}
+            />
             <PopupGame
                 visible={popupGameVisible}
                 onClose={() => setPopupGameVisible(false)}
