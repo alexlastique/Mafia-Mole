@@ -54,23 +54,14 @@ async def broadcast(message: str):
     for dc in dead_clients:
         clients.remove(dc)
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
-
 @app.post("/corpse/create")
 def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}
 
 @app.post("/corpse/find")
-async def read_item(item_id: int, q: str | None = None):
-    await broadcast("{\"corpseId\": " + json.dumps(item_id) + "}")
-    return {"item_id": item_id, "q": q}
+async def call_meeting(corpse_id: int):
+    await broadcast("{\"meeting\": " + json.dumps(corpse_id) + "}")
+    return {"message": "Corpse found : " + str(corpse_id)}
 
 @app.post("/room/create")
 def read_item(item_id: int, q: str | None = None):
