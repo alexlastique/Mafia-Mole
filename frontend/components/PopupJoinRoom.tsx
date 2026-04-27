@@ -1,6 +1,6 @@
 import { Text, View, Pressable, Modal, StyleSheet, TextInput, Platform } from "react-native";
 import { useState } from "react";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
 type PopupJoinProps = {
   visible: boolean;
@@ -9,6 +9,13 @@ type PopupJoinProps = {
 
 export default function PopupJoinRoom({ visible, onClose }: PopupJoinProps) {
   const [code, setCode] = useState("");
+  const router = useRouter(); // Initialisation du router
+
+  const handlePressCommencer = () => {
+    onClose();
+    
+    router.push("/rooms");
+  };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -20,7 +27,7 @@ export default function PopupJoinRoom({ visible, onClose }: PopupJoinProps) {
             <Text style={styles.closeText}>X</Text>
           </Pressable>
 
-          {/* Titre avec ombre portée (comme sur l'image) */}
+          {/* Titre */}
           <Text style={styles.title}>REJOINDRE</Text>
 
           {/* Ligne CODE + Input */}
@@ -34,13 +41,12 @@ export default function PopupJoinRoom({ visible, onClose }: PopupJoinProps) {
             />
           </View>
 
-          {/* Bouton COMMENCER (Vert) */}
-          <Link 
-              href="/rooms" 
+          <Pressable 
             style={styles.btnCommencer} 
+            onPress={handlePressCommencer}
           >
             <Text style={styles.btnCommencerText}>COMMENCER</Text>
-          </Link>
+          </Pressable>
 
         </Pressable>
       </Pressable>
@@ -80,7 +86,6 @@ const styles = StyleSheet.create({
     color: "#000",
     marginVertical: 20,
     fontFamily: Platform.OS === 'android' ? 'monospace' : 'Courier New',
-    // Effet d'ombre sur le texte
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 1,
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   btnCommencer: {
-    backgroundColor: "#22C55E", // Vert vif
+    backgroundColor: "#22C55E",
     paddingVertical: 12,
     paddingHorizontal: 35,
     borderRadius: 25,
