@@ -54,7 +54,7 @@ export default function Tableau(){
                     style={{ width: 95, height: 100, backgroundColor: 'transparent', position: 'absolute', top: '30%', left: '30%', transform: [{ rotate: '4deg' }] }}
                 />
                 <Link 
-                    href="/parametres" 
+                    href="/shakerGame" 
                     style={{ width: 60, height: 60, backgroundColor: 'transparent', position: 'absolute', top: '60%', left: '10%', transform: [{ rotate: '-8deg' }] }}
                 />
                 <Link 
