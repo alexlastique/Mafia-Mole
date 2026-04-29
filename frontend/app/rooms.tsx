@@ -14,12 +14,12 @@ interface Player {
   premium: boolean;
 }
 
-const ws = new WebSocket("ws://26.169.50.207:8000/ws");
+const ws = new WebSocket("ws://0.0.0.0:8000/ws");
 
 async function disconnectRoom(roomId: number = 1, currentUserId: number =2) {
   console.log("Attempting to quit room...");
   try {
-    const res = await fetch(`http://26.169.50.207:8000/room/quit/${roomId}`, {
+    const res = await fetch(`http://0.0.0.0:8000/room/quit/${roomId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_user: currentUserId }),
@@ -35,7 +35,7 @@ async function disconnectRoom(roomId: number = 1, currentUserId: number =2) {
 async function startGame(roomId: number = 1) {
   console.log("Attempting to start game...");
   try {
-    const res = await fetch(`http://26.169.50.207:8000/room/start/${roomId}`, {
+    const res = await fetch(`http://0.0.0.0:8000/room/start/${roomId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
@@ -67,7 +67,7 @@ export default function Index() {
     useEffect(() => {
       (async () => {
         try {
-          const res = await fetch("http://26.169.50.207:8000/room/join/1", {
+          const res = await fetch("http://0.0.0.0:8000/room/join/1", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

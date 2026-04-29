@@ -17,7 +17,6 @@ export default function Stats() {
       <Text>Y: {data.y.toFixed(2)}</Text>
       <Text>Z: {data.z.toFixed(2)}</Text>
       <Text>Shaking: {isShaking ? 'Yes' : 'No'}</Text>
-      <Text>Device sensors (accelerometer, gyroscope) 2</Text>
     </View>
  );
 }

@@ -2,7 +2,7 @@ import { View, Text, Button, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
-const ws = new WebSocket("ws://26.169.50.207:8000/ws");
+const ws = new WebSocket("ws://0.0.0.0:8000/ws");
 
 export default function Game() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function Game() {
   const endGame = async () => {
     const roomId = 1;
     try {
-      const res = await fetch(`http://26.169.50.207:8000/room/finish/${roomId}`, {
+      const res = await fetch(`http://0.0.0.0:8000/room/finish/${roomId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -55,10 +55,17 @@ export default function Game() {
     router.push("/");
   };
 
+  const startShakerGame = () => {
+    router.push("/shakerGame");
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Page game</Text>
       <Text style={styles.status}>{status}</Text>
+      <View style={styles.button}>
+        <Button title="Faire le mini-jeu" onPress={startShakerGame} color="#d32f2f" />
+      </View>
       <View style={styles.button}>
         <Button title="Terminer la game" onPress={endGame} color="#d32f2f" />
       </View>
