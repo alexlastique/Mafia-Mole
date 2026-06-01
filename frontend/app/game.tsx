@@ -2,7 +2,8 @@ import { View, Text, Button, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
-const ws = new WebSocket("ws://0.0.0.0:8000/ws");
+const apiIP = process.env.EXPO_PUBLIC_API_IP;
+const ws = new WebSocket(`ws://${apiIP}:8000/ws`);
 
 export default function Game() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function Game() {
   const endGame = async () => {
     const roomId = 1;
     try {
-      const res = await fetch(`http://0.0.0.0:8000/room/finish/${roomId}`, {
+      const res = await fetch(`http://${apiIP}:8000/room/finish/${roomId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });

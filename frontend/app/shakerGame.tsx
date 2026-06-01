@@ -1,29 +1,33 @@
 import { View, Text, Image, Pressable } from "react-native";
 import { useAccelerometer } from "@/function/getPosition";
-import { Link, router } from "expo-router";
-import { useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 
 function goBack() {
   router.back();
 }
 
 function addPourcentage(pourcentage: number): number {
-    return Math.min(pourcentage + 1, 100);
+    return Math.min(pourcentage + 10, 100);
 }
 
 export default function ShakerGame() {
     const { data, isShaking } = useAccelerometer();
     const [shakePourcentage, setShakePourcentage] = useState(0);
 
-    if (isShaking) {
-        setTimeout(() => {
-            setShakePourcentage(prev => addPourcentage(prev));
-        }, 500);
-    }
-    
-    if (shakePourcentage >= 100) {
-        router.back();
-    }
+    useEffect(() => {
+        if (!isShaking) {
+            return;
+        }
+
+        setShakePourcentage(prev => addPourcentage(prev));
+    }, [isShaking]);
+
+    useEffect(() => {
+        if (shakePourcentage >= 100) {
+            goBack();
+        }
+    }, [shakePourcentage]);
   
     return (
         <View>
