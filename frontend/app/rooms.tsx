@@ -1,6 +1,6 @@
 import { Text, View , StyleSheet, Image, Pressable } from "react-native";
 import { useState, useEffect } from "react";
-import { Link, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import Pub from "../components/Pub";
 import ParameterButton from "../components/ParameterButton";
 import PopupGameStat from "../components/PopupGameStat";
@@ -17,7 +17,12 @@ interface Player {
 const apiIP = process.env.EXPO_PUBLIC_API_IP;
 const ws = new WebSocket(`ws://${apiIP}:8000/ws`);
 
-async function disconnectRoom(roomId: number = 1, currentUserId: number =2) {
+async function disconnectRoom(roomId?: number, currentUserId: number = 2) {
+  if (!roomId || Number.isNaN(roomId)) {
+    console.log("disconnectRoom missing or invalid roomId");
+    return;
+  }
+
   console.log("Attempting to quit room...");
   try {
     const res = await fetch(`http://${apiIP}:8000/room/quit/${roomId}`, {
@@ -33,7 +38,12 @@ async function disconnectRoom(roomId: number = 1, currentUserId: number =2) {
   }
 }
 
-async function startGame(roomId: number = 1) {
+async function startGame(roomId?: number) {
+  if (!roomId || Number.isNaN(roomId)) {
+    console.log("startGame missing or invalid roomId");
+    return;
+  }
+
   console.log("Attempting to start game...");
   try {
     const res = await fetch(`http://${apiIP}:8000/room/start/${roomId}`, {
@@ -46,10 +56,11 @@ async function startGame(roomId: number = 1) {
   }
 }
 
-
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
     const [listePlayer, setListePlayer] = useState<Player[]>([]);
+    const { roomId } = useLocalSearchParams();
+    const roomIdNumber = Number(roomId);
 
     ws.onmessage = (event) => {
       try {
@@ -58,7 +69,12 @@ export default function Index() {
           setListePlayer(data.playerInRoom);
         } else if (data.start) {
           ws.close();
-          router.push('/game');
+          router.push({
+            pathname: "/game",
+            params: {
+                roomId,
+            },
+          });
         }
       }catch (e) {
         console.log("WebSocket message parsing error:", e);
@@ -66,9 +82,14 @@ export default function Index() {
     };
 
     useEffect(() => {
+      if (!roomIdNumber || Number.isNaN(roomIdNumber)) {
+        console.log("Invalid roomId for join request");
+        return;
+      }
+
       (async () => {
         try {
-          const res = await fetch(`http://${apiIP}:8000/room/join/1`, {
+          const res = await fetch(`http://${apiIP}:8000/room/join/${roomIdNumber}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -82,7 +103,7 @@ export default function Index() {
           console.log("room fetch error", e);
         }
       })();
-    }, []);
+    }, [roomIdNumber]);
 
     let maxPlayer = 10;
   return (
@@ -94,7 +115,7 @@ export default function Index() {
       }}
     >
       <Pressable
-        onPress={() => disconnectRoom()}
+        onPress={() => disconnectRoom(roomIdNumber)}
         style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
       >
         <Image 
@@ -125,7 +146,7 @@ export default function Index() {
       <View style={{ borderBottomWidth: 5, borderColor: '#A4A2B4', width: 393, marginTop: 24 }} />
 
       <Pressable
-        onPress={() => startGame()}
+        onPress={() => startGame(roomIdNumber)}
         style={{ marginTop: 23 }}>
         <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 28, backgroundColor: '#21B83D', paddingHorizontal: 77, paddingVertical: 15, borderRadius: 100 }}>Lancer la partie</Text>
       </Pressable>

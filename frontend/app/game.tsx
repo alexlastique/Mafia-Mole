@@ -1,5 +1,5 @@
 import { View, Text, Button, StyleSheet, Alert } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
 const apiIP = process.env.EXPO_PUBLIC_API_IP;
@@ -8,6 +8,8 @@ const ws = new WebSocket(`ws://${apiIP}:8000/ws`);
 export default function Game() {
   const router = useRouter();
   const [status, setStatus] = useState("En attente de jeu...");
+  const { roomId } = useLocalSearchParams();
+  const roomIdNumber = Number(roomId);
 
   ws.onmessage = (event) => {
       try {
@@ -27,9 +29,13 @@ export default function Game() {
   };
 
   const endGame = async () => {
-    const roomId = 1;
+    if (!roomIdNumber || Number.isNaN(roomIdNumber)) {
+      Alert.alert("Erreur", "ID de salle invalide.");
+      return;
+    }
+
     try {
-      const res = await fetch(`http://${apiIP}:8000/room/finish/${roomId}`, {
+      const res = await fetch(`http://${apiIP}:8000/room/finish/${roomIdNumber}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -57,7 +63,12 @@ export default function Game() {
   };
 
   const startShakerGame = () => {
-    router.push("/shakerGame");
+    router.push({
+      pathname: "/shakerGame",
+      params: {
+        roomId,
+      },
+    });
   }
 
   return (

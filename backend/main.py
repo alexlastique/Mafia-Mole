@@ -9,6 +9,12 @@ import mysql.connector
 class JoinRequest(BaseModel):
     id_user: int
 
+class RoomCreateRequest(BaseModel):
+    roomId: str
+    nbJoueurs: int
+    latitude: float
+    longitude: float
+
 app = FastAPI()
 with open("db_config.json", "r") as f:
     param = json.load(f)
@@ -64,8 +70,31 @@ async def call_meeting(corpse_id: int):
     return {"message": "Corpse found : " + str(corpse_id)}
 
 @app.post("/room/create")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+def create_room(req: RoomCreateRequest):
+    roomId = req.roomId
+    nbJoueurs = req.nbJoueurs
+    latitude = req.latitude
+    longitude = req.longitude
+    rayon = 200
+    
+    print(f"roomID: {roomId}, nbJoueurs: {nbJoueurs}, latitude: {latitude}, longitude: {longitude}")
+
+    # creer un json avec les infos de la room
+    room_info = {
+        "roomId": roomId,
+        "nbJoueurs": nbJoueurs,
+        "latitude": latitude,
+        "longitude": longitude,
+        "rayon": rayon
+    }
+
+    room_status = {"status": "waiting"}
+
+    cursor = conn.cursor()
+    
+    cursor.execute("INSERT INTO game (Parameter_, Status) VALUES (%s, %s)", (json.dumps(room_info), json.dumps(room_status)))
+    conn.commit()
+    return {"message": "Room created successfully"}
 
 @app.post("/room/join/{room_id}")
 async def join_room(room_id: int, req: JoinRequest):

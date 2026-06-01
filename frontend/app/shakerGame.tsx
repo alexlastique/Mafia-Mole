@@ -1,6 +1,6 @@
 import { View, Text, Image, Pressable } from "react-native";
 import { useAccelerometer } from "@/function/getPosition";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 
 function goBack() {
@@ -14,6 +14,7 @@ function addPourcentage(pourcentage: number): number {
 export default function ShakerGame() {
     const { data, isShaking } = useAccelerometer();
     const [shakePourcentage, setShakePourcentage] = useState(0);
+    const { roomId } = useLocalSearchParams();
 
     useEffect(() => {
         if (!isShaking) {
