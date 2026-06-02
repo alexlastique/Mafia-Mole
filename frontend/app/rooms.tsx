@@ -17,8 +17,8 @@ interface Player {
 const apiIP = process.env.EXPO_PUBLIC_API_IP;
 const ws = new WebSocket(`ws://${apiIP}:8000/ws`);
 
-async function disconnectRoom(roomId?: number, currentUserId: number = 2) {
-  if (!roomId || Number.isNaN(roomId)) {
+async function disconnectRoom(roomId?: string | string[], currentUserId: number = 2) {
+  if (!roomId) {
     console.log("disconnectRoom missing or invalid roomId");
     return;
   }
@@ -38,8 +38,8 @@ async function disconnectRoom(roomId?: number, currentUserId: number = 2) {
   }
 }
 
-async function startGame(roomId?: number) {
-  if (!roomId || Number.isNaN(roomId)) {
+async function startGame(roomId?: string | string[]) {
+  if (!roomId) {
     console.log("startGame missing or invalid roomId");
     return;
   }
@@ -60,7 +60,6 @@ export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
     const [listePlayer, setListePlayer] = useState<Player[]>([]);
     const { roomId } = useLocalSearchParams();
-    const roomIdNumber = Number(roomId);
 
     ws.onmessage = (event) => {
       try {
@@ -82,14 +81,14 @@ export default function Index() {
     };
 
     useEffect(() => {
-      if (!roomIdNumber || Number.isNaN(roomIdNumber)) {
+      if (!roomId) {
         console.log("Invalid roomId for join request");
         return;
       }
 
       (async () => {
         try {
-          const res = await fetch(`http://${apiIP}:8000/room/join/${roomIdNumber}`, {
+          const res = await fetch(`http://${apiIP}:8000/room/join/${roomId}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -103,7 +102,7 @@ export default function Index() {
           console.log("room fetch error", e);
         }
       })();
-    }, [roomIdNumber]);
+    }, [roomId]);
 
     let maxPlayer = 10;
   return (
@@ -115,7 +114,7 @@ export default function Index() {
       }}
     >
       <Pressable
-        onPress={() => disconnectRoom(roomIdNumber)}
+        onPress={() => disconnectRoom(roomId)}
         style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
       >
         <Image 
@@ -146,7 +145,7 @@ export default function Index() {
       <View style={{ borderBottomWidth: 5, borderColor: '#A4A2B4', width: 393, marginTop: 24 }} />
 
       <Pressable
-        onPress={() => startGame(roomIdNumber)}
+        onPress={() => startGame(roomId)}
         style={{ marginTop: 23 }}>
         <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 28, backgroundColor: '#21B83D', paddingHorizontal: 77, paddingVertical: 15, borderRadius: 100 }}>Lancer la partie</Text>
       </Pressable>

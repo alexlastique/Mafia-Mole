@@ -97,7 +97,7 @@ def create_room(req: RoomCreateRequest):
     return {"message": "Room created successfully"}
 
 @app.post("/room/join/{room_id}")
-async def join_room(room_id: int, req: JoinRequest):
+async def join_room(room_id: str, req: JoinRequest):
     id_user = req.id_user
     cursor = conn.cursor()
 
@@ -108,7 +108,6 @@ async def join_room(room_id: int, req: JoinRequest):
         cursor.execute("INSERT INTO user (Id, Pseudo) VALUES (%s, %s)", (id_user, f"User {id_user}"))
         conn.commit()
 
-    # cursor.execute("INSERT INTO `mafiamole`.`game` (`Id`, `Parameter_`, `Status`) VALUES ('1', 'teste', 'test')")
     cursor.execute("UPDATE user SET Id_1 = %s WHERE Id = %s", (room_id, id_user))
     conn.commit()
     
@@ -128,7 +127,7 @@ async def join_room(room_id: int, req: JoinRequest):
     return {"playerInRoom": playerInRoom}
 
 @app.post("/room/quit/{room_id}")
-async def quit_room(room_id: int, req: JoinRequest):
+async def quit_room(room_id: str, req: JoinRequest):
     id_user = req.id_user
     cursor = conn.cursor()
 
@@ -139,7 +138,6 @@ async def quit_room(room_id: int, req: JoinRequest):
         cursor.execute("INSERT INTO user (Id, Pseudo) VALUES (%s, %s)", (id_user, f"User {id_user}"))
         conn.commit()
 
-    # cursor.execute("INSERT INTO `mafiamole`.`game` (`Id`, `Parameter_`, `Status`) VALUES ('1', 'teste', 'test')")
     cursor.execute("UPDATE user SET Id_1 = null WHERE Id = %s", (id_user,))
     conn.commit()
     
@@ -159,13 +157,13 @@ async def quit_room(room_id: int, req: JoinRequest):
     return {"playerInRoom": playerInRoom}
 
 @app.post("/room/start/{room_id}")
-async def start_room(room_id: int):
+async def start_room(room_id: str):
     await broadcast("{\"start\": true}")
     print("Start game for room", room_id)
     return {"start": True}
 
 @app.post("/room/finish/{room_id}")
-async def finish_room(room_id: int):
+async def finish_room(room_id: str):
     await broadcast("{\"end\": true}")
     print("Finish game for room", room_id)
     return {"end": True}

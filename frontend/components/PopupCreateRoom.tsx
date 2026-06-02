@@ -6,8 +6,8 @@ import { useGPSPosition } from "@/function/getGPSPosition";
 const apiIP = process.env.EXPO_PUBLIC_API_IP;
 
 type PopupCreateRoomProps = {
-    visible: boolean;
-    onClose: () => void;
+  visible: boolean;
+  onClose: () => void;
 };
 
 export default function PopupCreateRoom({ visible, onClose }: PopupCreateRoomProps) {
@@ -15,27 +15,27 @@ export default function PopupCreateRoom({ visible, onClose }: PopupCreateRoomPro
     const router = useRouter(); // Initialisation du router
     const { location, error, loading } = useGPSPosition(); // Utilisation du hook pour obtenir la position GPS
     const handlePressCréer = async () => {
-        onClose();
-        
-        const roomId = Math.random().toString(36).substring(2, 8).toUpperCase(); // Génère un ID de room aléatoire de 6 caractères
-        const latitude = location?.coords.latitude ?? 0;
-        const longitude = location?.coords.longitude ?? 0;
+      onClose();
+      
+      const roomId = Math.random().toString(36).substring(2, 8).toUpperCase(); // Génère un ID de room aléatoire de 6 caractères
+      const latitude = location?.coords.latitude ?? 0;
+      const longitude = location?.coords.longitude ?? 0;
 
-        const response = await fetch(`http://${apiIP}:8000/room/create`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ roomId, nbJoueurs, latitude, longitude })
-        });
-        if (!response.ok) {
-            console.error("Erreur lors de la création de la room");
-            return;
-        }
-        router.push({
-            pathname: "/rooms",
-            params: {
-                roomId,
-            },
-        });
+      const response = await fetch(`http://${apiIP}:8000/room/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, nbJoueurs, latitude, longitude })
+      });
+      if (!response.ok) {
+        console.error("Erreur lors de la création de la room");
+        return;
+      }
+      router.push({
+        pathname: "/rooms",
+        params: {
+          roomId: roomId,
+        },
+      });
     };
 
     return (

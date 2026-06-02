@@ -14,7 +14,14 @@ export default function PopupJoinRoom({ visible, onClose }: PopupJoinProps) {
   const handlePressCommencer = () => {
     onClose();
     
-    router.push("/rooms");
+    // shearch in bdd with backend if the room exist with the code, if not show an alert
+
+    router.push({
+      pathname: "/rooms",
+      params: {
+        roomId: code,
+      },
+    });
   };
 
   return (
