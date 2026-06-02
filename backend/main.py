@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import List
+from typing import Dict, List
 from pydantic import BaseModel
 
 import json
@@ -27,38 +27,55 @@ conn = mysql.connector.connect(
 )
 
 
-clients: List[WebSocket] = []
+clients: Dict[str, List[WebSocket]] = {}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    room_id = websocket.query_params.get("roomId", "global")
     await websocket.accept()
-    clients.append(websocket)
-    print(f"Client connecté ({len(clients)})")
+    clients.setdefault(room_id, []).append(websocket)
+    print(f"Client connecté ({len(clients[room_id])}) dans la room {room_id}")
 
     try:
         while True:
             data = await websocket.receive_text()
             print("Message reçu:", data)
 
-            # broadcast à TOUS
-            for client in clients:
+            for client in list(clients.get(room_id, [])):
                 if client != websocket:
                     await client.send_text(data)
 
     except WebSocketDisconnect:
-        clients.remove(websocket)
-        print(f"Client déconnecté ({len(clients)})")
+        room_clients = clients.get(room_id, [])
+        if websocket in room_clients:
+            room_clients.remove(websocket)
+        if not room_clients:
+            clients.pop(room_id, None)
+        print(f"Client déconnecté ({len(clients.get(room_id, []))}) de la room {room_id}")
 
-async def broadcast(message: str):
+async def broadcast(message: str, room_id: str | None = None):
     dead_clients = []
-    for client in clients:
+    targets: List[WebSocket] = []
+
+    if room_id is None:
+        for room in clients.values():
+            targets.extend(room)
+    else:
+        targets = list(clients.get(room_id, []))
+
+    for client in targets:
         try:
             await client.send_text(message)
         except:
             dead_clients.append(client)
 
     for dc in dead_clients:
-        clients.remove(dc)
+        for room_key, room in list(clients.items()):
+            if dc in room:
+                room.remove(dc)
+                if not room:
+                    clients.pop(room_key, None)
+                    break
 
 @app.post("/corpse/create")
 def read_item(item_id: int, q: str | None = None):
@@ -122,7 +139,7 @@ async def join_room(room_id: str, req: JoinRequest):
             "skin": "default",
             "premium": row[2] if row[2] is not None else False
         })
-    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}", room_id=room_id)
     
     return {"playerInRoom": playerInRoom}
 
@@ -152,19 +169,19 @@ async def quit_room(room_id: str, req: JoinRequest):
             "skin": "default",
             "premium": row[2] if row[2] is not None else False
         })
-    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}", room_id=room_id)
     
     return {"playerInRoom": playerInRoom}
 
 @app.post("/room/start/{room_id}")
 async def start_room(room_id: str):
-    await broadcast("{\"start\": true}")
+    await broadcast("{\"start\": true}", room_id=room_id)
     print("Start game for room", room_id)
     return {"start": True}
 
 @app.post("/room/finish/{room_id}")
 async def finish_room(room_id: str):
-    await broadcast("{\"end\": true}")
+    await broadcast("{\"end\": true}", room_id=room_id)
     print("Finish game for room", room_id)
     return {"end": True}
 

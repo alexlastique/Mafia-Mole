@@ -15,80 +15,69 @@ interface Player {
 }
 
 const apiIP = process.env.EXPO_PUBLIC_API_IP;
-const ws = new WebSocket(`ws://${apiIP}:8000/ws`);
-
-async function disconnectRoom(roomId?: string | string[], currentUserId: number = 2) {
-  if (!roomId) {
-    console.log("disconnectRoom missing or invalid roomId");
-    return;
-  }
-
-  console.log("Attempting to quit room...");
-  try {
-    const res = await fetch(`http://${apiIP}:8000/room/quit/${roomId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_user: currentUserId }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    ws.close();
-    router.back();
-  } catch (e) {
-    console.log("room quit error", e);
-  }
-}
-
-async function startGame(roomId?: string | string[]) {
-  if (!roomId) {
-    console.log("startGame missing or invalid roomId");
-    return;
-  }
-
-  console.log("Attempting to start game...");
-  try {
-    const res = await fetch(`http://${apiIP}:8000/room/start/${roomId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  } catch (e) {
-    console.log("room start error", e);
-  }
-}
 
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
     const [listePlayer, setListePlayer] = useState<Player[]>([]);
+    const [ws, setWs] = useState<WebSocket | null>(null);
     const { roomId } = useLocalSearchParams();
-
-    ws.onmessage = (event) => {
-      try {
-        let data = JSON.parse(event.data);
-        if (data.playerInRoom) {
-          setListePlayer(data.playerInRoom);
-        } else if (data.start) {
-          ws.close();
-          router.push({
-            pathname: "/game",
-            params: {
-                roomId,
-            },
-          });
-        }
-      }catch (e) {
-        console.log("WebSocket message parsing error:", e);
-      }
-    };
+    const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
 
     useEffect(() => {
-      if (!roomId) {
+      if (!roomString) {
+        console.log("Invalid roomId for websocket connection");
+        return;
+      }
+
+      const socket = new WebSocket(`ws://${apiIP}:8000/ws?roomId=${encodeURIComponent(roomString)}`);
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.playerInRoom) {
+            setListePlayer(data.playerInRoom);
+          } else if (data.start) {
+            socket.close();
+            router.push({
+              pathname: "/game",
+              params: {
+                roomId: roomString,
+              },
+            });
+          }
+        } catch (e) {
+          console.log("WebSocket message parsing error:", e);
+        }
+      };
+
+      socket.onopen = () => {
+        console.log("WebSocket connecté pour la room", roomString);
+      };
+
+      socket.onerror = (event) => {
+        console.log("WebSocket error:", event);
+      };
+
+      socket.onclose = () => {
+        console.log("WebSocket fermé pour la room", roomString);
+      };
+
+      setWs(socket);
+
+      return () => {
+        socket.close();
+        setWs(null);
+      };
+    }, [roomString]);
+
+    useEffect(() => {
+      if (!roomString) {
         console.log("Invalid roomId for join request");
         return;
       }
 
       (async () => {
         try {
-          const res = await fetch(`http://${apiIP}:8000/room/join/${roomId}`, {
+          const res = await fetch(`http://${apiIP}:8000/room/join/${roomString}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -102,7 +91,50 @@ export default function Index() {
           console.log("room fetch error", e);
         }
       })();
-    }, [roomId]);
+    }, [roomString]);
+
+    async function disconnectRoom(roomId?: string | string[], currentUserId: number = 2) {
+      const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
+      if (!roomString) {
+        console.log("disconnectRoom missing or invalid roomId");
+        return;
+      }
+
+      console.log("Attempting to quit room...");
+      try {
+        const res = await fetch(`http://${apiIP}:8000/room/quit/${roomString}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_user: currentUserId }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+        router.back();
+      } catch (e) {
+        console.log("room quit error", e);
+      }
+    }
+
+    async function startGame(roomId?: string | string[]) {
+      const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
+      if (!roomString) {
+        console.log("startGame missing or invalid roomId");
+        return;
+      }
+
+      console.log("Attempting to start game...");
+      try {
+        const res = await fetch(`http://${apiIP}:8000/room/start/${roomString}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      } catch (e) {
+        console.log("room start error", e);
+      }
+    }
 
     let maxPlayer = 10;
   return (
