@@ -22,6 +22,7 @@ export default function Index() {
     const [ws, setWs] = useState<WebSocket | null>(null);
     const { roomId } = useLocalSearchParams();
     const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
+    const [maxPlayer, setMaxPlayer] = useState(11);
 
     useEffect(() => {
       if (!roomString) {
@@ -86,6 +87,7 @@ export default function Index() {
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
+          setMaxPlayer(data.maxPlayers || 10);
           setListePlayer(data.playerInRoom || []);
         } catch (e) {
           console.log("room fetch error", e);
@@ -136,7 +138,7 @@ export default function Index() {
       }
     }
 
-    let maxPlayer = 10;
+    
   return (
     <View
       style={{

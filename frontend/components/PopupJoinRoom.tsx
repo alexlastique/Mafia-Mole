@@ -2,6 +2,8 @@ import { Text, View, Pressable, Modal, StyleSheet, TextInput, Platform } from "r
 import { useState } from "react";
 import { useRouter } from "expo-router";
 
+const apiIP = process.env.EXPO_PUBLIC_API_IP;
+
 type PopupJoinProps = {
   visible: boolean;
   onClose: () => void;
@@ -11,17 +13,30 @@ export default function PopupJoinRoom({ visible, onClose }: PopupJoinProps) {
   const [code, setCode] = useState("");
   const router = useRouter(); // Initialisation du router
 
-  const handlePressCommencer = () => {
-    onClose();
-    
-    // shearch in bdd with backend if the room exist with the code, if not show an alert
+  const handlePressCommencer = async () => {
 
-    router.push({
-      pathname: "/rooms",
-      params: {
-        roomId: code,
-      },
+    const response = await fetch(`http://${apiIP}:8000/room/code/${code}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
     });
+    if (!response.ok) {
+      alert("Probleme avec la requete. Veuillez vérifier et réessayer.");
+      return;
+    }
+    else {
+      const data = await response.json();
+      if (data.error) {
+        alert("Code de salle invalide. Veuillez vérifier et réessayer.");
+        return;
+      }
+      onClose();
+      router.push({
+        pathname: "/rooms",
+        params: {
+          roomId: code,
+        },
+      });
+    }
   };
 
   return (

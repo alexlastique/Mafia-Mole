@@ -139,9 +139,23 @@ async def join_room(room_id: str, req: JoinRequest):
             "skin": "default",
             "premium": row[2] if row[2] is not None else False
         })
-    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}", room_id=room_id)
+
+    cursor.execute("SELECT Parameter_ FROM game WHERE Parameter_ LIKE %s", (f'%"roomId": "{room_id}"%',))
+    room_row = cursor.fetchone()
+    # DB returns a tuple like ('{"roomId": "35AX8Z", ...}',)
+    room_parameter = None
+    if room_row:
+        try:
+            room_parameter = json.loads(room_row[0])
+        except Exception as e:
+            print("Failed to parse room Parameter_ JSON:", e)
+
+    print(f"room_parameter: {room_row}")
+    maxPlayers = room_parameter.get("nbJoueurs", 10) if room_parameter else 10
+    print(f"maxPlayers: {maxPlayers}")
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + ", \"maxPlayers\": " + str(maxPlayers) + "}", room_id=room_id)
     
-    return {"playerInRoom": playerInRoom}
+    return {"playerInRoom": playerInRoom, "maxPlayers": maxPlayers}
 
 @app.post("/room/quit/{room_id}")
 async def quit_room(room_id: str, req: JoinRequest):
@@ -185,9 +199,13 @@ async def finish_room(room_id: str):
     print("Finish game for room", room_id)
     return {"end": True}
 
-@app.get("/room/code")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+@app.get("/room/code/{room_id}")
+def read_item(room_id: str):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM game WHERE Parameter_ LIKE %s", (f'%"roomId": "{room_id}"%',))
+    if cursor.fetchone() is None:
+        return {"error": "Room not found"}
+    return {"room_id": room_id}
 
 @app.get("/room/parameter")
 def read_item(item_id: int, q: str | None = None):
