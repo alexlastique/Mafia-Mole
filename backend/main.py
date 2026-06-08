@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import List
+from typing import Dict, List
 from pydantic import BaseModel
 
 import json
@@ -8,6 +8,12 @@ import mysql.connector
 
 class JoinRequest(BaseModel):
     id_user: int
+
+class RoomCreateRequest(BaseModel):
+    roomId: str
+    nbJoueurs: int
+    latitude: float
+    longitude: float
 
 app = FastAPI()
 with open("db_config.json", "r") as f:
@@ -21,63 +27,94 @@ conn = mysql.connector.connect(
 )
 
 
-clients: List[WebSocket] = []
+clients: Dict[str, List[WebSocket]] = {}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    room_id = websocket.query_params.get("roomId", "global")
     await websocket.accept()
-    clients.append(websocket)
-    print(f"Client connecté ({len(clients)})")
+    clients.setdefault(room_id, []).append(websocket)
+    print(f"Client connecté ({len(clients[room_id])}) dans la room {room_id}")
 
     try:
         while True:
             data = await websocket.receive_text()
             print("Message reçu:", data)
 
-            # broadcast à TOUS
-            for client in clients:
+            for client in list(clients.get(room_id, [])):
                 if client != websocket:
                     await client.send_text(data)
 
     except WebSocketDisconnect:
-        clients.remove(websocket)
-        print(f"Client déconnecté ({len(clients)})")
+        room_clients = clients.get(room_id, [])
+        if websocket in room_clients:
+            room_clients.remove(websocket)
+        if not room_clients:
+            clients.pop(room_id, None)
+        print(f"Client déconnecté ({len(clients.get(room_id, []))}) de la room {room_id}")
 
-async def broadcast(message: str):
+async def broadcast(message: str, room_id: str | None = None):
     dead_clients = []
-    for client in clients:
+    targets: List[WebSocket] = []
+
+    if room_id is None:
+        for room in clients.values():
+            targets.extend(room)
+    else:
+        targets = list(clients.get(room_id, []))
+
+    for client in targets:
         try:
             await client.send_text(message)
         except:
             dead_clients.append(client)
 
     for dc in dead_clients:
-        clients.remove(dc)
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+        for room_key, room in list(clients.items()):
+            if dc in room:
+                room.remove(dc)
+                if not room:
+                    clients.pop(room_key, None)
+                    break
 
 @app.post("/corpse/create")
 def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}
 
 @app.post("/corpse/find")
-async def read_item(item_id: int, q: str | None = None):
-    await broadcast(f"Corpse trouvé: {item_id}")
-    return {"item_id": item_id, "q": q}
+async def call_meeting(corpse_id: int):
+    await broadcast("{\"meeting\": " + json.dumps(corpse_id) + "}")
+    return {"message": "Corpse found : " + str(corpse_id)}
 
 @app.post("/room/create")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+def create_room(req: RoomCreateRequest):
+    roomId = req.roomId
+    nbJoueurs = req.nbJoueurs
+    latitude = req.latitude
+    longitude = req.longitude
+    rayon = 200
+    
+    print(f"roomID: {roomId}, nbJoueurs: {nbJoueurs}, latitude: {latitude}, longitude: {longitude}")
+
+    # creer un json avec les infos de la room
+    room_info = {
+        "roomId": roomId,
+        "nbJoueurs": nbJoueurs,
+        "latitude": latitude,
+        "longitude": longitude,
+        "rayon": rayon
+    }
+
+    room_status = {"status": "waiting"}
+
+    cursor = conn.cursor()
+    
+    cursor.execute("INSERT INTO game (Parameter_, Status) VALUES (%s, %s)", (json.dumps(room_info), json.dumps(room_status)))
+    conn.commit()
+    return {"message": "Room created successfully"}
 
 @app.post("/room/join/{room_id}")
-async def join_room(room_id: int, req: JoinRequest):
+async def join_room(room_id: str, req: JoinRequest):
     id_user = req.id_user
     cursor = conn.cursor()
 
@@ -88,7 +125,6 @@ async def join_room(room_id: int, req: JoinRequest):
         cursor.execute("INSERT INTO user (Id, Pseudo) VALUES (%s, %s)", (id_user, f"User {id_user}"))
         conn.commit()
 
-    # cursor.execute("INSERT INTO `mafiamole`.`game` (`Id`, `Parameter_`, `Status`) VALUES ('1', 'teste', 'test')")
     cursor.execute("UPDATE user SET Id_1 = %s WHERE Id = %s", (room_id, id_user))
     conn.commit()
     
@@ -103,12 +139,26 @@ async def join_room(room_id: int, req: JoinRequest):
             "skin": "default",
             "premium": row[2] if row[2] is not None else False
         })
-    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
+
+    cursor.execute("SELECT Parameter_ FROM game WHERE Parameter_ LIKE %s", (f'%"roomId": "{room_id}"%',))
+    room_row = cursor.fetchone()
+    # DB returns a tuple like ('{"roomId": "35AX8Z", ...}',)
+    room_parameter = None
+    if room_row:
+        try:
+            room_parameter = json.loads(room_row[0])
+        except Exception as e:
+            print("Failed to parse room Parameter_ JSON:", e)
+
+    print(f"room_parameter: {room_row}")
+    maxPlayers = room_parameter.get("nbJoueurs", 10) if room_parameter else 10
+    print(f"maxPlayers: {maxPlayers}")
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + ", \"maxPlayers\": " + str(maxPlayers) + "}", room_id=room_id)
     
-    return {"playerInRoom": playerInRoom}
+    return {"playerInRoom": playerInRoom, "maxPlayers": maxPlayers}
 
 @app.post("/room/quit/{room_id}")
-async def quit_room(room_id: int, req: JoinRequest):
+async def quit_room(room_id: str, req: JoinRequest):
     id_user = req.id_user
     cursor = conn.cursor()
 
@@ -119,7 +169,6 @@ async def quit_room(room_id: int, req: JoinRequest):
         cursor.execute("INSERT INTO user (Id, Pseudo) VALUES (%s, %s)", (id_user, f"User {id_user}"))
         conn.commit()
 
-    # cursor.execute("INSERT INTO `mafiamole`.`game` (`Id`, `Parameter_`, `Status`) VALUES ('1', 'teste', 'test')")
     cursor.execute("UPDATE user SET Id_1 = null WHERE Id = %s", (id_user,))
     conn.commit()
     
@@ -134,13 +183,29 @@ async def quit_room(room_id: int, req: JoinRequest):
             "skin": "default",
             "premium": row[2] if row[2] is not None else False
         })
-    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}")
+    await broadcast("{\"playerInRoom\": " + json.dumps(playerInRoom) + "}", room_id=room_id)
     
     return {"playerInRoom": playerInRoom}
 
-@app.get("/room/code")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/room/start/{room_id}")
+async def start_room(room_id: str):
+    await broadcast("{\"start\": true}", room_id=room_id)
+    print("Start game for room", room_id)
+    return {"start": True}
+
+@app.post("/room/finish/{room_id}")
+async def finish_room(room_id: str):
+    await broadcast("{\"end\": true}", room_id=room_id)
+    print("Finish game for room", room_id)
+    return {"end": True}
+
+@app.get("/room/code/{room_id}")
+def read_item(room_id: str):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM game WHERE Parameter_ LIKE %s", (f'%"roomId": "{room_id}"%',))
+    if cursor.fetchone() is None:
+        return {"error": "Room not found"}
+    return {"room_id": room_id}
 
 @app.get("/room/parameter")
 def read_item(item_id: int, q: str | None = None):

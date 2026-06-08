@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Mole - Jeu de Réalité Augmentée</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🕵️ MAFIA MOLE</div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Accueil</a></li>
+                <li><a href="#game" class="nav-link">Le Jeu</a></li>
+                <li><a href="#gallery" class="nav-link">Galerie</a></li>
+                <li><a href="#faq" class="nav-link">FAQ</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="title">🎮 MAFIA MOLE</h1>
+            <p class="tagline">Transformez votre environnement en terrain de jeu grandeur nature</p>
+            <div class="hero-description">
+                <p>Chasse au trésor • Jeu de Rôle • Enquête • Réalité Augmentée</p>
+            </div>
+            <button class="cta-button" onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })">
+                Rejoindre la Bêta 🚀
+            </button>
+        </div>
+        <div class="hero-animation">
+            <div class="animated-player"></div>
+        </div>
+    </section>
+
+    <!-- Game Description Section -->
+    <section id="game" class="game-section">
+        <div class="container">
+            <h2>Comment ça marche ?</h2>
+            <div class="elevator-pitch">
+                <p>Imaginez une application qui transforme n'importe quel lieu — un parc, un campus, un bâtiment — en terrain de jeu grandeur nature. Un organisateur crée une partie, définit la zone où jouer et place des points d'intérêt.</p>
+                
+                <div class="game-flow">
+                    <div class="step">
+                        <div class="step-icon">👥</div>
+                        <h3>Rejoignez une partie</h3>
+                        <p>Les participants rejoignent et reçoivent secrètement un rôle</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">🗺️</div>
+                        <h3>Explorez & Accomplissez</h3>
+                        <p>Déplacez-vous dans la zone réelle pour accomplir des missions</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">🕵️</div>
+                        <h3>Identifiez les saboteurs</h3>
+                        <p>Découvrez qui sont les infiltrés parmi vous</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">⚔️</div>
+                        <h3>Votez & Éliminez</h3>
+                        <p>Éliminez les suspects à travers des votes collectifs</p>
+                    </div>
+                </div>
+
+                <div class="roles">
+                    <div class="role-card team">
+                        <h3>👨‍💼 Membres de l'Équipe</h3>
+                        <p>Accomplissez les missions et travaillez ensemble pour terminer le jeu avant que les saboteurs prennent le dessus.</p>
+                    </div>
+                    <div class="role-card saboteur">
+                        <h3>🕵️ Saboteurs</h3>
+                        <p>Infiltrez-vous discrètement, éliminez les adversaires et prenez le contrôle avant que le plan ne soit découvert.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery-section">
+        <div class="container">
+            <h2>Galerie</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span>🗺️ Création de Partie</span>
+                    </div>
+                    <p>Créez votre propre terrain de jeu avec des points d'intérêt personnalisés</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <span>📍 Navigation GPS</span>
+                    </div>
+                    <p>Système de GPS intégré pour suivre les positions en temps réel</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <span>🎯 Missions</span>
+                    </div>
+                    <p>Accomplissez des missions variées dans la vraie vie</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <span>💬 Chat de Jeu</span>
+                    </div>
+                    <p>Communiquez avec vos coéquipiers en temps réel</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <span>📊 Statistiques</span>
+                    </div>
+                    <p>Suivez votre performance et vos achievements</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                        <span>🎭 Personnalisation</span>
+                    </div>
+                    <p>Personnalisez votre profil et vos préférences</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2>Pourquoi Mafia Mole ?</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Partout et Nulle Part</h3>
+                    <p>Jouez dans n'importe quel environnement réel : parc, campus, quartier</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">👥</div>
+                    <h3>Jeu Collaboratif</h3>
+                    <p>Testez votre stratégie et votre collaboration en équipe</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Action & Stratégie</h3>
+                    <p>Combinez l'adrénaline du mouvement avec la réflexion tactique</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>100% Mobile</h3>
+                    <p>Conçu pour une expérience mobile fluide et intuitive</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section">
+        <div class="container">
+            <h2>Questions Fréquemment Posées</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Combien de joueurs peut-on avoir dans une partie ?</span>
+                        <span class="toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Une partie peut accueillir entre 6 et 30 joueurs. Plus il y a de joueurs, plus le jeu devient complexe et amusant !</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Combien de temps dure une partie ?</span>
+                        <span class="toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Une partie typique dure entre 30 et 90 minutes, selon le nombre de joueurs et la taille de la zone de jeu.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Faut-il une connexion internet pendant le jeu ?</span>
+                        <span class="toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Oui, une connexion 4G/5G ou WiFi est nécessaire pour la géolocalisation en temps réel et la synchronisation des données de jeu.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Y a-t-il des limites de zones de jeu ?</span>
+                        <span class="toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Non ! Vous pouvez créer des zones de jeu partout : parcs, écoles, campus, quartiers, bâtiments, musées, etc.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Comment jouer en toute sécurité ?</span>
+                        <span class="toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Le jeu fonctionne en zones définies que vous contrôlez. Les joueurs restent toujours dans une zone sûre et délimitée que vous avez établie.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>L'application est-elle gratuite ?</span>
+                        <span class="toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Pendant la phase bêta, l'application est complètement gratuite. Des détails sur les modèles de monétisation future seront annoncés prochainement.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2>Rejoignez la Communauté</h2>
+            <p class="contact-intro">Vous êtes intéressé ? Inscrivez-vous à la bêta et soyez parmi les premiers à jouer !</p>
+            
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <input type="text" id="name" name="name" placeholder="Votre nom" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" name="email" placeholder="Votre email" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="city" name="city" placeholder="Votre ville">
+                </div>
+                <div class="form-group">
+                    <textarea id="message" name="message" placeholder="Parlez-nous de vous ou posez une question..." rows="5"></textarea>
+                </div>
+                <button type="submit" class="submit-button">S'inscrire à la Bêta 🎮</button>
+                <p class="form-note" id="formNote"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Mafia Mole - Tous droits réservés | Version Bêta 0.1</p>
+            <div class="footer-links">
+                <a href="#home">Accueil</a>
+                <a href="#game">Le Jeu</a>
+                <a href="#faq">FAQ</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -26,13 +26,13 @@ export default function PopupGame({ visible, onClose, onJoin, onCreate }: PopupG
             </Pressable>
 
             {/* Boutons d'action */}
+            <Pressable style={[styles.actionButton, styles.btnCreate]} onPress={onCreate}>
+              <Text style={styles.actionText}>CRÉER UNE PARTIE</Text>
+            </Pressable>
+
             <Pressable style={[styles.actionButton, styles.btnJoin]} onPress={onJoin}>
               <Text style={styles.actionText}>REJOINDRE UNE PARTIE</Text>
             </Pressable>
-
-            {/* <Pressable style={[styles.actionButton, styles.btnCreate]} onPress={onCreate}>
-              <Text style={styles.actionText}>CRÉER UNE PARTIE</Text>
-            </Pressable> */}
           </View>
         </Pressable>
         

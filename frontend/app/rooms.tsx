@@ -1,8 +1,7 @@
 import { Text, View , StyleSheet, Image, Pressable } from "react-native";
 import { useState, useEffect } from "react";
-import { Link, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import Pub from "../components/Pub";
-import BackButton from "../components/BackButton";
 import ParameterButton from "../components/ParameterButton";
 import PopupGameStat from "../components/PopupGameStat";
 import PlayerItem from "@/components/PlayerItem";
@@ -15,59 +14,131 @@ interface Player {
   premium: boolean;
 }
 
-const ws = new WebSocket("ws://26.83.105.189:8000/ws");
-
-async function disconnectRoom(roomId: number = 1, currentUserId: number =1) {
-  console.log("Attempting to quit room...");
-  try {
-    const res = await fetch(`http://10.0.2.2:8000/room/quit/${roomId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_user: currentUserId }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    ws.close();
-    router.back(); // go back to lobby/menu
-  } catch (e) {
-    console.log("room quit error", e);
-  }
-}
+const apiIP = process.env.EXPO_PUBLIC_API_IP;
 
 export default function Index() {
     const [popupGameVisisble, setPopupGameVisible] = useState(false);
     const [listePlayer, setListePlayer] = useState<Player[]>([]);
+    const [ws, setWs] = useState<WebSocket | null>(null);
+    const { roomId } = useLocalSearchParams();
+    const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
+    const [maxPlayer, setMaxPlayer] = useState(11);
 
-    ws.onmessage = (event) => {
-      try {
-        let data = JSON.parse(event.data);
-        if (data.playerInRoom) {
-          setListePlayer(data.playerInRoom);
-        }
-      }catch (e) {
-        console.log("WebSocket message parsing error:", e);
-      }
-      console.log(event.data);
-    };
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await fetch("http://10.0.2.2:8000/room/join/1", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ id_user: 1 }),
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                setListePlayer(data.playerInRoom || []);
-            } catch (e) {
-                console.log("room fetch error", e);
-            }
-        })();
-    }, []);
+      if (!roomString) {
+        console.log("Invalid roomId for websocket connection");
+        return;
+      }
 
-    let maxPlayer = 10;
+      const socket = new WebSocket(`ws://${apiIP}:8000/ws?roomId=${encodeURIComponent(roomString)}`);
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.playerInRoom) {
+            setListePlayer(data.playerInRoom);
+          } else if (data.start) {
+            socket.close();
+            router.push({
+              pathname: "/game",
+              params: {
+                roomId: roomString,
+              },
+            });
+          }
+        } catch (e) {
+          console.log("WebSocket message parsing error:", e);
+        }
+      };
+
+      socket.onopen = () => {
+        console.log("WebSocket connecté pour la room", roomString);
+      };
+
+      socket.onerror = (event) => {
+        console.log("WebSocket error:", event);
+      };
+
+      socket.onclose = () => {
+        console.log("WebSocket fermé pour la room", roomString);
+      };
+
+      setWs(socket);
+
+      return () => {
+        socket.close();
+        setWs(null);
+      };
+    }, [roomString]);
+
+    useEffect(() => {
+      if (!roomString) {
+        console.log("Invalid roomId for join request");
+        return;
+      }
+
+      (async () => {
+        try {
+          const res = await fetch(`http://${apiIP}:8000/room/join/${roomString}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id_user: 2 }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          setMaxPlayer(data.maxPlayers || 10);
+          setListePlayer(data.playerInRoom || []);
+        } catch (e) {
+          console.log("room fetch error", e);
+        }
+      })();
+    }, [roomString]);
+
+    async function disconnectRoom(roomId?: string | string[], currentUserId: number = 2) {
+      const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
+      if (!roomString) {
+        console.log("disconnectRoom missing or invalid roomId");
+        return;
+      }
+
+      console.log("Attempting to quit room...");
+      try {
+        const res = await fetch(`http://${apiIP}:8000/room/quit/${roomString}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_user: currentUserId }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+        router.back();
+      } catch (e) {
+        console.log("room quit error", e);
+      }
+    }
+
+    async function startGame(roomId?: string | string[]) {
+      const roomString = Array.isArray(roomId) ? roomId[0] : roomId;
+      if (!roomString) {
+        console.log("startGame missing or invalid roomId");
+        return;
+      }
+
+      console.log("Attempting to start game...");
+      try {
+        const res = await fetch(`http://${apiIP}:8000/room/start/${roomString}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      } catch (e) {
+        console.log("room start error", e);
+      }
+    }
+
+    
   return (
     <View
       style={{
@@ -77,7 +148,7 @@ export default function Index() {
       }}
     >
       <Pressable
-        onPress={() => disconnectRoom()}
+        onPress={() => disconnectRoom(roomId)}
         style={{ width: 43, height: 43, position: 'absolute', top: 10, left: 10 }}
       >
         <Image 
@@ -108,7 +179,7 @@ export default function Index() {
       <View style={{ borderBottomWidth: 5, borderColor: '#A4A2B4', width: 393, marginTop: 24 }} />
 
       <Pressable
-        onPress={() => router.push('/parametres')}
+        onPress={() => startGame(roomId)}
         style={{ marginTop: 23 }}>
         <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 28, backgroundColor: '#21B83D', paddingHorizontal: 77, paddingVertical: 15, borderRadius: 100 }}>Lancer la partie</Text>
       </Pressable>
