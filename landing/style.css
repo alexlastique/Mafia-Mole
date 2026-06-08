@@ -704,4 +704,123 @@ body {
         padding: 12px 30px;
         font-size: 1rem;
     }
+
+    /* ============================================
+    POP-UP / MODAL SYSTEM
+    ============================================ */
+    .step {
+        cursor: pointer; /* Indique que le bloc est cliquable */
+    }
+
+    .modal {
+        display: none; /* Caché par défaut */
+        position: fixed; 
+        z-index: 9999; /* Augmenté pour être certain de passer devant TOUT le reste */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(26, 32, 44, 0.8); 
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Cette classe doit impérativement forcer l'affichage */
+    .modal.show {
+        display: flex important;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: var(--border-radius);
+        width: 90%;
+        max-width: 700px;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transform: translateY(-50px);
+        transition: transform 0.3s ease;
+    }
+
+    .modal.show .modal-content {
+        transform: translateY(0);
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--text);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .close-modal:hover {
+        color: var(--accent);
+    }
+
+    .modal-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-items: center;
+        margin-top: 15px;
+    }
+
+    .modal-image-container {
+        width: 100%;
+        height: 250px;
+        background: #edf2f7;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* L'image s'adapte sans se déformer */
+    }
+
+    .modal-text-container h3 {
+        font-size: 1.8rem;
+        color: var(--dark);
+        margin-bottom: 15px;
+    }
+
+    .modal-text-container p {
+        color: var(--text);
+        font-size: 1.05rem;
+        line-height: 1.6;
+    }
+
+    /* ============================================
+    RESPONSIVE POUR LA POP-UP SUR MOBILE
+    ============================================ */
+    @media (max-width: 768px) {
+        .modal-body-container {
+            flex-direction: column !important; /* Remet l'image au-dessus du texte sur mobile */
+            align-items: stretch !important;
+            max-height: 75vh !important;
+            overflow-y: auto !important;
+        }
+        
+        .modal-image-container {
+            flex: none !important;
+            max-width: 100% !important;
+            height: 200px !important; /* Hauteur fixe pour l'image sur mobile */
+        }
+
+        .modal-content {
+            padding: 20px !important;
+        }
+    }
 }

@@ -144,3 +144,70 @@ document.head.appendChild(style);
 // ============================================
 console.log('🕵️ Mafia Mole Landing Page loaded successfully!');
 console.log('Submissions can be viewed in localStorage: mafiaMoleSubmissions');
+
+// ============================================
+// POP-UP / MODAL FUNCTIONALITY (VERSION FORCEE)
+// ============================================
+
+const stepData = {
+    "1": {
+        title: "👥 Rejoignez la partie",
+        description: "Scannez le QR Code de l'organisateur ou entrez le code unique pour entrer dans le salon de jeu. Une fois la partie lancée, l'application vous attribuera secrètement votre rôle : ferez-vous partie de l'équipe honnête ou serez-vous le saboteur infiltré ?",
+        image: "images/join.png" // Image de test pour vérifier le fonctionnement
+    },
+    "2": {
+        title: "🗺️ Explorez",
+        description: "Ouvrez la carte en temps réel et déplacez-vous physiquement dans la zone de jeu.",
+        image: "images/explore.png" // Image de test pour vérifier le fonctionnement
+    },
+    "3": {
+        title: "🎮 Participez à des mini-jeux",
+        description: "Approchez-vous des points d'intérêt GPS pour déclencher des mini-jeux et des énigmes en Réalité Augmentée afin de faire progresser la barre de victoire de votre équipe.",
+        image: "images/game.png" // Image de test pour vérifier le fonctionnement
+    },
+    "4": {
+        title: "🕵️ Identifiez les saboteurs",
+        description: "Ouvrez l'œil ! Si un joueur rôde bizarrement autour d'une zone ou si une mission échoue juste après son passage, il y a de fortes chances qu'il s'agisse d'une taupe. Utilisez le chat ou réunissez-vous pour partager vos soupçons.",
+        image: "images/mole.png" // Image de test pour vérifier le fonctionnement
+    }
+};
+
+const modal = document.getElementById('gameModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalDesc = document.getElementById('modalDescription');
+const modalImg = document.getElementById('modalImg');
+const closeModalBtn = document.querySelector('.close-modal');
+
+document.querySelectorAll('.step').forEach(stepBtn => {
+    // On force le curseur en pointeur pour montrer que c'est cliquable
+    stepBtn.style.cursor = 'pointer';
+    
+    stepBtn.addEventListener('click', () => {
+        const stepIndex = stepBtn.getAttribute('data-step');
+        const data = stepData[stepIndex];
+
+        if (data) {
+            modalTitle.textContent = data.title;
+            modalDesc.textContent = data.description;
+            modalImg.src = data.image;
+            modalImg.alt = data.title;
+
+            // FORCE L'AFFICHAGE EN JAVASCRIPT
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; 
+        }
+    });
+});
+
+closeModalBtn.addEventListener('click', closeModal);
+
+window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; 
+}
